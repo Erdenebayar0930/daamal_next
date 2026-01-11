@@ -2,8 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind 3.x-д body-д apply ажиллах ёстой */
-body {
-  font-family: 'Inter', sans-serif; /* @apply font-sans-ийг шууд ашиглах боломжгүй үед */
-  background-color: #f3f4f6; /* Tailwind bg-gray-100 */
+/* Optional scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100,100,100,0.5);
+  border-radius: 3px;
 }

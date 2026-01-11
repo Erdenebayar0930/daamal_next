@@ -1,12 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class", 
   content: [
-    "./src/pages/**/*.{js,jsx,ts,tsx}",       // pages folder
-    "./src/components/**/*.{js,jsx,ts,tsx}",  // components folder
-    "./src/app/**/*.{js,jsx,ts,tsx}"          // хэрэв app folder байгаа бол
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./src/app/**/*.{js,ts,jsx,tsx}", // app router хэрэглэвэл
   ],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
