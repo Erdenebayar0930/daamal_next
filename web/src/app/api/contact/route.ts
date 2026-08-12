@@ -5,7 +5,7 @@ import { sendOfferMail } from "@/lib/mail";
 /**
  * Бартерын саналыг хүлээн авах endpoint.
  *
- * 1. Postgres-ийн `barter_offers`-т хадгална (сан хүрэхгүй бол JSONL нөөцөд).
+ * 1. MariaDB-ийн `barter_offers`-т хадгална (сан хүрэхгүй бол JSONL нөөцөд).
  * 2. Мэдэгдлийн имэйл илгээнэ (SMTP_* тохируулсан үед).
  * 3. Нэмэлт: CONTACT_WEBHOOK_URL байвал Slack/Discord руу мөн шиднэ.
  *
@@ -94,15 +94,15 @@ export async function POST(req: Request) {
     userAgent: req.headers.get("user-agent")?.slice(0, 300) ?? "",
   };
 
-  // --- 1. Хадгалалт: Postgres, амжилтгүй бол дискэн дэх нөөц ---
-  let offerId: string | null = null;
+  // --- 1. Хадгалалт: MariaDB, амжилтгүй бол дискэн дэх нөөц ---
+  let offerId: number | null = null;
   let saved = false;
 
   try {
     offerId = await insertOffer(record);
     saved = true;
   } catch (err) {
-    console.error("[contact] Postgres-д бичиж чадсангүй:", err);
+    console.error("[contact] сан руу бичиж чадсангүй:", err);
     try {
       const file = await saveFallback(record);
       saved = true;

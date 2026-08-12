@@ -1,16 +1,16 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import type { ResultSetHeader } from "mysql2";
 import { getPool } from "./db";
 
 /**
- * Бартерын саналыг Postgres-ийн `barter_offers` хүснэгтэд хадгална
- * (эцэг апп хэрэглэдэг тэр л сан — DATABASE_URL).
+ * Бартерын саналыг MariaDB-ийн `barter_offers` хүснэгтэд хадгална.
  *
  * Хүснэгтийг үүсгэх: `npm run db:setup` (scripts/barter-offers.sql).
  *
  * Хэрэв сан унтарсан/хүрэхгүй бол санал алдагдуулахгүйн тулд диск дээрх
  * JSONL файлд буулгана (CONTACT_STORE_PATH, үндсэн нь data/offers.jsonl).
- * Тэр файлыг `npm run offers` уншина.
+ * Тэр файлыг `npm run offers -- --file` уншина.
  */
 
 export type Offer = {
@@ -30,12 +30,11 @@ export function fallbackPath() {
   return path.resolve(process.cwd(), process.env.CONTACT_STORE_PATH || DEFAULT_STORE);
 }
 
-/** Postgres-д бичнэ. Амжилттай бол мөрийн id-г буцаана. */
-export async function insertOffer(record: Offer): Promise<string> {
-  const { rows } = await getPool().query<{ id: string }>(
-    `INSERT INTO barter_offers (name, email, industry, "offer", ip, user_agent, created_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
-     RETURNING id`,
+/** MariaDB руу бичнэ. Амжилттай бол мөрийн id-г буцаана. */
+export async function insertOffer(record: Offer): Promise<number> {
+  const [result] = await getPool().execute<ResultSetHeader>(
+    `INSERT INTO barter_offers (name, email, industry, \`offer\`, ip, user_agent, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       record.name,
       record.email,
@@ -43,15 +42,18 @@ export async function insertOffer(record: Offer): Promise<string> {
       record.offer,
       record.ip,
       record.userAgent,
-      record.at,
+      // MySQL нь ISO-гийн "Z"-г ойлгодоггүй — DATETIME хэлбэрт хөрвүүлнэ (UTC)
+      record.at.slice(0, 19).replace("T", " "),
     ],
   );
-  return rows[0].id;
+  return result.insertId;
 }
 
 /** Имэйл явсныг тэмдэглэнэ. Амжилтгүй болвол зүгээр л алгасна. */
-export async function markEmailed(id: string) {
-  await getPool().query(`UPDATE barter_offers SET emailed_at = now() WHERE id = $1`, [id]);
+export async function markEmailed(id: number) {
+  await getPool().execute(`UPDATE barter_offers SET emailed_at = UTC_TIMESTAMP() WHERE id = ?`, [
+    id,
+  ]);
 }
 
 /** Сан хүрэхгүй үеийн нөөц — нэг мөр = нэг санал (JSONL). */

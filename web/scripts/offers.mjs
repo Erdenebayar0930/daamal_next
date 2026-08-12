@@ -1,5 +1,5 @@
 /*
- * Ирсэн бартерын саналуудыг Postgres-ээс уншиж хэвлэнэ.
+ * Ирсэн бартерын саналуудыг MariaDB-ээс уншиж хэвлэнэ.
  * Сан хүрэхгүй бол дискэн дэх нөөц файлаас (JSONL) уншина.
  *
  *   npm run offers                 # сүүлийн 50
@@ -9,7 +9,7 @@
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import pg from "pg";
+import mysql from "mysql2/promise";
 
 const args = process.argv.slice(2);
 const asJson = args.includes("--json");
@@ -28,8 +28,8 @@ function print(offers, source, broken = 0) {
     console.log(`Салбар : ${o.industry || "—"}`);
     console.log(`IP     : ${o.ip}`);
     if (o.emailedAt)
-      console.log(`Имэйл  : явсан (${new Date(o.emailedAt).toLocaleString("mn-MN")})`);
-    else if (o.emailedAt === null) console.log(`Имэйл  : яваагүй`);
+      console.log(`Мэдэгд.: явсан (${new Date(o.emailedAt).toLocaleString("mn-MN")})`);
+    else if (o.emailedAt === null) console.log(`Мэдэгд.: яваагүй`);
     console.log(`Санал  : ${o.offer}`);
   }
   console.log(`\n${"─".repeat(60)}`);
@@ -61,31 +61,32 @@ async function fromFile() {
   print(offers, `${file} (нөөц)`, broken);
 }
 
-if (fileOnly || !process.env.DATABASE_URL) {
-  if (!fileOnly) console.log("DATABASE_URL алга — нөөц файлаас уншиж байна.\n");
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
+
+if (fileOnly || !DB_NAME || !DB_USER) {
+  if (!fileOnly) console.log("Сангийн тохиргоо алга — нөөц файлаас уншиж байна.\n");
   await fromFile();
   process.exit(0);
 }
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 10_000,
-  ssl:
-    process.env.DATABASE_SSL === "relaxed"
-      ? { rejectUnauthorized: false }
-      : process.env.DATABASE_SSL === "require"
-        ? true
-        : undefined,
-});
-
+let conn;
 try {
-  const { rows } = await pool.query(
-    `SELECT name, email, industry, "offer", ip, emailed_at, created_at
+  conn = await mysql.createConnection({
+    host: DB_HOST || "localhost",
+    port: Number(DB_PORT ?? 3306),
+    user: DB_USER,
+    password: DB_PASSWORD ?? "",
+    database: DB_NAME,
+    charset: "utf8mb4_unicode_ci",
+  });
+
+  const [rows] = await conn.query(
+    `SELECT name, email, industry, \`offer\`, ip, emailed_at, created_at
        FROM barter_offers
-      ORDER BY created_at DESC
+      ORDER BY created_at DESC, id DESC
       ${all ? "" : "LIMIT 50"}`,
   );
-  const db = new URL(process.env.DATABASE_URL).pathname.slice(1);
+
   print(
     rows.map((r) => ({
       at: r.created_at,
@@ -96,13 +97,11 @@ try {
       ip: r.ip,
       emailedAt: r.emailed_at,
     })),
-    `postgres:${db}/barter_offers${all ? "" : " (сүүлийн 50 — бүгдийг --all)"}`,
+    `mysql:${DB_NAME}/barter_offers${all ? "" : " (сүүлийн 50 — бүгдийг --all)"}`,
   );
 } catch (err) {
-  console.error(
-    `Postgres-ээс уншиж чадсангүй (${err.code || err.message}). Нөөц файл руу шилжлээ.\n`,
-  );
+  console.error(`Сангаас уншиж чадсангүй (${err.code || err.message}). Нөөц файл руу шилжлээ.\n`);
   await fromFile();
 } finally {
-  await pool.end();
+  if (conn) await conn.end();
 }

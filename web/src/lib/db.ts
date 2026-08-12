@@ -1,13 +1,14 @@
-import { Pool } from "pg";
+import mysql, { type Pool } from "mysql2/promise";
 
 /**
- * Postgres холболт — эцэг апп (daamal_next) хэрэглэдэг тэр л сан.
+ * MariaDB/MySQL холболт — Hostinger shared hosting дээрх сан.
  *
  * Pool-ыг ЗАЛХУУ (lazy) үүсгэнэ: build үед route-ын модуль ачаалагдахад
- * DATABASE_URL байхгүй байж болох тул тэр үед унах ёсгүй. Мөн dev дэх hot
- * reload болон serverless орчинд холболт хуримтлахаас сэргийлж global-д кэшлэнэ.
+ * тохиргоо байхгүй байж болох тул тэр үед унах ёсгүй. Passenger аппыг дахин
+ * ачаалахад холболт хуримтлахаас сэргийлж global-д кэшлэнэ.
  *
- * (Эцэг аппын src/lib/db/index.ts-тэй ижил конвенц — SSL, pool max адилхан.)
+ * Тохиргоог DB_* хувьсагчаар өгнө (hPanel яг ийм хэлбэрээр харуулдаг).
+ * Нууц үгэнд тусгай тэмдэгт орвол URL-encode хийх шаардлагагүй нь давуу тал.
  */
 
 const globalForDb = globalThis as unknown as { __daamalWebPool?: Pool };
@@ -15,29 +16,30 @@ const globalForDb = globalThis as unknown as { __daamalWebPool?: Pool };
 export function getPool(): Pool {
   if (globalForDb.__daamalWebPool) return globalForDb.__daamalWebPool;
 
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL тохируулаагүй байна. web/.env.local файлдаа нэмнэ үү.");
+  const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
+
+  if (!DB_NAME || !DB_USER) {
+    throw new Error("DB_NAME / DB_USER тохируулаагүй байна. .env.local файлдаа нэмнэ үү.");
   }
 
-  const pool = new Pool({
-    connectionString,
-    max: Number(process.env.DATABASE_POOL_MAX ?? 5),
-    idleTimeoutMillis: 10_000,
-    connectionTimeoutMillis: 10_000,
-    // DATABASE_SSL: "require" — сертификат шалгана
-    //               "relaxed" — өөрийн гарын үсэгтэйг зөвшөөрнө
-    //               бусад/хоосон — SSL хэрэглэхгүй (локал сервер)
-    ssl:
-      process.env.DATABASE_SSL === "relaxed"
-        ? { rejectUnauthorized: false }
-        : process.env.DATABASE_SSL === "require"
-          ? true
-          : undefined,
+  const pool = mysql.createPool({
+    /*
+     * "localhost" БИШ, 127.0.0.1 гэж үзнэ: mysql2 нь localhost-ыг IPv6 ::1
+     * болгож хөрвүүлдэг ба Hostinger-ийн эрх зөвхөн 'user'@'localhost'-д
+     * олгогддог тул ::1 хаяг таарахгүй ("Access denied ... @'::1'").
+     */
+    host: DB_HOST || "127.0.0.1",
+    port: Number(DB_PORT ?? 3306),
+    user: DB_USER,
+    password: DB_PASSWORD ?? "",
+    database: DB_NAME,
+    waitForConnections: true,
+    // Shared hosting дээр нэг хэрэглэгчийн холболтын тоо хязгаартай — багаар барина
+    connectionLimit: Number(process.env.DB_POOL_MAX ?? 3),
+    connectTimeout: 10_000,
+    // Кирилл бүрэн орохын тулд заавал utf8mb4
+    charset: "utf8mb4_unicode_ci",
   });
-
-  // Pool-ын идэвхгүй холболт унасан ч процесс унахаас сэргийлнэ.
-  pool.on("error", (err) => console.error("[db] pool алдаа:", err));
 
   globalForDb.__daamalWebPool = pool;
   return pool;
