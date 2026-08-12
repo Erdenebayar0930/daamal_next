@@ -1,1 +1,59 @@
-{}
+{
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 1966,
+    "files": [
+      "static/chunks/9585.ac8eb68d4d3bc101.js"
+    ]
+  },
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 3899,
+    "files": [
+      "static/chunks/3899.cf10152d8085e352.js"
+    ]
+  },
+  "components\\charts\\bar\\BarChartOne.tsx -> react-apexcharts": {
+    "id": 4822,
+    "files": [
+      "static/chunks/477d4af2.e0a6db611beee1eb.js",
+      "static/chunks/4822.65440d923daa9780.js"
+    ]
+  },
+  "components\\charts\\line\\LineChartOne.tsx -> react-apexcharts": {
+    "id": 4822,
+    "files": [
+      "static/chunks/477d4af2.e0a6db611beee1eb.js",
+      "static/chunks/4822.65440d923daa9780.js"
+    ]
+  },
+  "components\\dashboard\\BreakEvenChart.tsx -> react-apexcharts": {
+    "id": 4822,
+    "files": [
+      "static/chunks/477d4af2.e0a6db611beee1eb.js",
+      "static/chunks/4822.65440d923daa9780.js"
+    ]
+  },
+  "components\\dashboard\\ExpenseDonut.tsx -> react-apexcharts": {
+    "id": 4822,
+    "files": [
+      "static/chunks/477d4af2.e0a6db611beee1eb.js",
+      "static/chunks/4822.65440d923daa9780.js"
+    ]
+  },
+  "components\\dashboard\\RevenueChart.tsx -> react-apexcharts": {
+    "id": 4822,
+    "files": [
+      "static/chunks/477d4af2.e0a6db611beee1eb.js",
+      "static/chunks/4822.65440d923daa9780.js"
+    ]
+  },
+  "lib\\fcm.ts -> ./firebase": {
+    "id": 6610,
+    "files": []
+  },
+  "lib\\notifications.ts -> ./fcm": {
+    "id": 8707,
+    "files": [
+      "static/chunks/8707.60b1829686646041.js"
+    ]
+  }
+}

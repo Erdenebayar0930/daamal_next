@@ -1,0 +1,1091 @@
+/* =========================================================================
+   Даамал — design system
+   Фонтууд next/font-ээр self-host болж, --font-* хувьсагчаар ирнэ (layout.tsx).
+   ========================================================================= */
+
+:root {
+  /* --- surface --- */
+  --ground: #04080f;
+  --surface: #080e1a;
+  --surface-2: #0d1525;
+  --deep: #020509;
+
+  /* --- line --- */
+  --line: rgba(59, 130, 246, 0.14);
+  --line-hi: rgba(59, 130, 246, 0.35);
+
+  /* --- brand --- */
+  --blue: #3b82f6;
+  --blue-hi: #60a5fa;
+  --blue-dim: rgba(59, 130, 246, 0.12);
+  --cyan: #22d3ee;
+  --cyan-dim: rgba(34, 211, 238, 0.08);
+  --green: #4ade80;
+
+  /* --- ink --- */
+  --ink: #e8eef8;
+  --muted: rgba(160, 175, 210, 0.72);
+  --muted-lo: rgba(120, 140, 180, 0.4);
+
+  /* --- type --- */
+  --display: var(--font-display), Georgia, "Times New Roman", serif;
+  --body: var(--font-body), Inter, system-ui, sans-serif;
+  --mono: var(--font-mono), ui-monospace, "Courier New", monospace;
+
+  /* --- rhythm --- */
+  --pad-x: clamp(24px, 6vw, 96px);
+  --shell: 1280px;
+  --section-y: clamp(80px, 10vw, 120px);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Fixed nav-ийн доор anchor заагдахгүй байхын тулд */
+  scroll-padding-top: 72px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------------------
+   Layout primitives
+   ------------------------------------------------------------------------- */
+
+.shell {
+  max-width: var(--shell);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section {
+  padding: var(--section-y) var(--pad-x);
+  position: relative;
+}
+
+.section--surface {
+  background: var(--surface);
+}
+
+.section--top-line {
+  border-top: 1px solid var(--line);
+}
+
+.section--clip {
+  overflow: hidden;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  background: var(--blue);
+  color: #fff;
+  padding: 12px 20px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+}
+
+/* Glow / grid decorations */
+.glow {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  /* Дээд/доод хэсэгт бүдгэрч сектэй нийлнэ */
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 72%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 72%, transparent);
+}
+
+/* -------------------------------------------------------------------------
+   Logo
+   ------------------------------------------------------------------------- */
+
+.logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo__word {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------------------
+   Nav
+   ------------------------------------------------------------------------- */
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  padding: 0 var(--pad-x);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    backdrop-filter 0.4s ease;
+}
+
+.nav[data-scrolled="true"] {
+  background: rgba(4, 8, 15, 0.95);
+  border-bottom-color: var(--line);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.nav__bar {
+  max-width: var(--shell);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+
+.nav__links {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+}
+
+.nav__link {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
+.nav__link:hover,
+.nav__link[aria-current="true"] {
+  color: var(--ink);
+}
+
+.nav__burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav__burger span {
+  height: 1.5px;
+  transition:
+    width 0.25s var(--ease),
+    background 0.25s;
+}
+
+.nav__burger span:nth-child(1) {
+  width: 22px;
+  background: var(--blue);
+}
+
+.nav__burger span:nth-child(2) {
+  width: 14px;
+  background: var(--cyan);
+}
+
+.nav__burger[aria-expanded="true"] span:nth-child(2) {
+  width: 22px;
+}
+
+.nav__drawer {
+  padding: 8px var(--pad-x) 20px;
+  /* Бүрэн битүү — backdrop-filter дэмждэггүй хөтөч дээр ч цаанаас юу ч харагдахгүй */
+  background: var(--ground);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 24px 48px rgba(2, 5, 9, 0.6);
+}
+
+.nav__drawer a {
+  display: block;
+  padding: 14px 0;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav__drawer a:last-child {
+  border-bottom: none;
+}
+
+/* -------------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 16px 38px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.btn--primary {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 500;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--blue-hi);
+}
+
+.btn--primary:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.btn--ghost {
+  border-color: var(--line);
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.btn--ghost:hover {
+  border-color: var(--line-hi);
+  color: var(--ink);
+}
+
+.btn--nav {
+  padding: 10px 24px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  background: var(--blue);
+  color: #fff;
+}
+
+.btn--nav:hover {
+  background: var(--blue-hi);
+}
+
+/* -------------------------------------------------------------------------
+   Hero
+   ------------------------------------------------------------------------- */
+
+.hero {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 140px var(--pad-x) 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero__inner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+}
+
+/* hero__title-ийн cqi нэгжийн суурь — текстийн баганын өргөн. */
+.hero__copy {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.hero__rule {
+  position: absolute;
+  top: 0;
+  right: clamp(80px, 12vw, 200px);
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    transparent 10%,
+    rgba(59, 130, 246, 0.12) 40%,
+    rgba(34, 211, 238, 0.12) 60%,
+    transparent 90%
+  );
+  pointer-events: none;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  padding: 7px 16px;
+  margin-bottom: clamp(28px, 4vw, 48px);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.eyebrow__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.eyebrow__text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.hero__title {
+  font-family: var(--display);
+  /*
+   * Гарчгийг vw-ээр биш, текстийн баганы өргөнөөр (cqi) хэмжинэ. 900px-ээс дээш
+   * hero__mark 320px иддэг тул vw нь бодит зайг илэрхийлэхээ больдог — cqi нь
+   * баганын жинхэнэ өргөнийг өгөх тул "нэг мөрөнд ~21 тэмдэгт" тогтвортой барина.
+   */
+  font-size: clamp(26px, 9cqi, 96px);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  margin-bottom: 36px;
+}
+
+.hero__title span {
+  display: block;
+}
+
+.hero__title .accent {
+  color: var(--blue);
+  font-style: italic;
+}
+
+.hero__lead {
+  font-size: clamp(15px, 1.7vw, 19px);
+  color: var(--muted);
+  max-width: 520px;
+  margin-bottom: clamp(32px, 4vw, 52px);
+  line-height: 1.7;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  border-left: 1px solid var(--line);
+  margin-bottom: clamp(32px, 4vw, 52px);
+}
+
+.stats__item {
+  padding-left: 28px;
+  padding-right: 40px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats__value {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--blue);
+}
+
+.stats__item:nth-child(even) .stats__value {
+  color: var(--cyan);
+}
+
+.stats__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted-lo);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero__mark {
+  opacity: 0.18;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Marquee ticker
+   ------------------------------------------------------------------------- */
+
+.ticker {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  padding: 18px 0;
+  overflow: hidden;
+  display: flex;
+  /* Хоёр талд бүдгэрүүлж, тайрсан мэдрэмжийг зөөлрүүлнэ */
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.ticker__track {
+  display: flex;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(59, 130, 246, 0.45);
+  animation: ticker 42s linear infinite;
+  will-change: transform;
+}
+
+.ticker:hover .ticker__track {
+  animation-play-state: paused;
+}
+
+.ticker__track span {
+  padding-right: 60px;
+}
+
+/* -------------------------------------------------------------------------
+   Section label
+   ------------------------------------------------------------------------- */
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(36px, 5vw, 56px);
+}
+
+.label__dot {
+  width: 6px;
+  height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan);
+  flex-shrink: 0;
+}
+
+.label__text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.label__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* -------------------------------------------------------------------------
+   Headings
+   ------------------------------------------------------------------------- */
+
+.h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+}
+
+.h2 .accent {
+  color: var(--blue);
+  font-style: italic;
+}
+
+.h2 .accent-muted {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.7em;
+}
+
+/* -------------------------------------------------------------------------
+   Services
+   ------------------------------------------------------------------------- */
+
+.services__title {
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.08;
+  margin-bottom: clamp(40px, 6vw, 72px);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--line);
+}
+
+.card {
+  background: var(--ground);
+  padding: 48px 36px;
+  height: 100%;
+  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  background: var(--surface);
+}
+
+.card__icon {
+  margin-bottom: 32px;
+}
+
+.card__n {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(59, 130, 246, 0.4);
+  letter-spacing: 0.2em;
+  margin-bottom: 16px;
+}
+
+.card__title {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+
+.card__desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.78;
+  margin-bottom: 28px;
+  flex: 1;
+}
+
+.card__rail {
+  height: 1px;
+  background: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+.card__rail::after {
+  content: "";
+  position: absolute;
+  inset: 0 100% 0 0;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  transition: right 0.5s ease;
+}
+
+.card:hover .card__rail::after {
+  right: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Barter
+   ------------------------------------------------------------------------- */
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(48px, 7vw, 96px);
+  align-items: start;
+}
+
+.barter__title {
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05;
+  margin-bottom: 32px;
+}
+
+.barter__body {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.82;
+  margin-bottom: 20px;
+}
+
+.barter__body:last-of-type {
+  margin-bottom: 40px;
+}
+
+.term {
+  background: var(--deep);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.term__bar {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.term__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.term__name {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted-lo);
+  margin-left: 8px;
+  letter-spacing: 0.1em;
+}
+
+.term__body {
+  padding: 20px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 2;
+  overflow-x: auto;
+}
+
+.term__prompt {
+  color: var(--cyan);
+}
+
+.term__cmd {
+  color: rgba(160, 175, 210, 0.5);
+}
+
+.term__arg--blue {
+  color: var(--blue);
+}
+
+.term__arg--green {
+  color: var(--green);
+}
+
+.term__comment {
+  color: rgba(148, 163, 196, 0.3);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 20px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Reveal wrapper-ээр хүрээлэгдсэн тул сүүлчийн зураасыг эцэг элементээс арилгана */
+.steps > *:last-child .step {
+  border-bottom: none;
+}
+
+.step__n {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--blue);
+  opacity: 0.5;
+  padding-top: 3px;
+  letter-spacing: 0.1em;
+}
+
+.step__title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.step__body {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+/* -------------------------------------------------------------------------
+   Industries
+   ------------------------------------------------------------------------- */
+
+.industries__title {
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1.1;
+  margin-bottom: clamp(36px, 5vw, 60px);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: block;
+  border: 1px solid var(--line);
+  padding: 12px 22px;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  transition:
+    border-color 0.22s,
+    color 0.22s,
+    background 0.22s;
+}
+
+.chip:hover {
+  border-color: var(--line-hi);
+  color: var(--ink);
+  background: var(--blue-dim);
+}
+
+/* -------------------------------------------------------------------------
+   Contact
+   ------------------------------------------------------------------------- */
+
+.contact__title {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.1;
+  margin-bottom: 40px;
+}
+
+.detail {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail__k {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(34, 211, 238, 0.5);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  min-width: 80px;
+}
+
+.detail__v {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a.detail__v:hover {
+  color: var(--ink);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(34, 211, 238, 0.5);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.field__input {
+  background: rgba(59, 130, 246, 0.03);
+  border: 1px solid var(--line);
+  padding: 13px 16px;
+  width: 100%;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 300;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--line-hi);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+textarea.field__input {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.field__input::placeholder {
+  color: rgba(120, 140, 180, 0.3);
+}
+
+.form__submit {
+  align-self: flex-start;
+  letter-spacing: 0.1em;
+}
+
+.form__note {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+}
+
+.form__note[data-tone="ok"] {
+  color: var(--green);
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.form__note[data-tone="bad"] {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+/* -------------------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------------------- */
+
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 36px var(--pad-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--ground);
+}
+
+.footer__copy {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted-lo);
+  letter-spacing: 0.12em;
+}
+
+/* -------------------------------------------------------------------------
+   Reveal on scroll
+   ------------------------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.75s var(--ease),
+    transform 0.75s var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* -------------------------------------------------------------------------
+   Animations
+   ------------------------------------------------------------------------- */
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes ticker {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Track нь 2 ижил хуулбартай — 50% нь нэг бүтэн цикл */
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .nav__links {
+    display: none;
+  }
+
+  .nav__burger {
+    display: flex;
+  }
+
+  .hero__mark,
+  .hero__rule {
+    display: none;
+  }
+
+  .hero__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 36px 26px;
+  }
+
+  .stats {
+    gap: 0;
+  }
+
+  .stats__item {
+    padding-left: 18px;
+    padding-right: 22px;
+  }
+
+  .stats__value {
+    font-size: 26px;
+  }
+
+  .btn {
+    padding: 14px 26px;
+    font-size: 12px;
+  }
+
+  .term__body {
+    font-size: 11px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Reduced motion / print
+   ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media print {
+  .nav,
+  .glow,
+  .grid-overlay,
+  .ticker {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

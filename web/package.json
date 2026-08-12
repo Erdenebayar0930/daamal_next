@@ -1,0 +1,36 @@
+{
+  "name": "daamal-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Даамал — танилцуулга вэбсайт (barter developer)",
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:setup": "node --env-file-if-exists=.env.local scripts/db-setup.mjs",
+    "offers": "node --env-file-if-exists=.env.local scripts/offers.mjs"
+  },
+  "dependencies": {
+    "next": "16.0.10",
+    "nodemailer": "^9.0.5",
+    "pg": "^8.23.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^20.19.25",
+    "@types/nodemailer": "^8.0.1",
+    "@types/pg": "^8.21.0",
+    "@types/react": "^19.2.1",
+    "@types/react-dom": "^19.2.1",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.0.7",
+    "prettier": "^3.9.6",
+    "typescript": "5.9.3"
+  }
+}
