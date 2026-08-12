@@ -36,11 +36,11 @@ npm run db:setup
 log "TypeScript шалгалт"
 npm run typecheck
 
-# Энд Turbopack ажиллахгүй: машин 64 цөм харуулдаг тул Turbopack тэр хэрээр
-# thread/процесс асаагаад LVE-ийн хязгаарт (~16-32) мөргөж "spawn node EAGAIN"
-# гэж унадаг. Webpack builder + 1 worker нь тогтвортой.
-log "Build (webpack, NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS:-1})"
-NEXT_BUILD_CPUS="${NEXT_BUILD_CPUS:-1}" npm run build:host
+# NEXT_BUILD_CPUS нь scripts/build.mjs-д webpack builder-ыг сонгуулна: энд
+# Turbopack нь 64 цөмд тааруулж процесс асаагаад LVE-ийн хязгаарт (~16-32)
+# мөргөж "spawn node EAGAIN" гэж унадаг.
+log "Build (NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS:-1})"
+NEXT_BUILD_CPUS="${NEXT_BUILD_CPUS:-1}" npm run build
 
 # Passenger нь tmp/restart.txt өөрчлөгдөхөд аппыг дахин ачаална
 log "Passenger-ийг дахин ачаалж байна"
